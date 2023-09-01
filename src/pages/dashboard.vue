@@ -26,7 +26,7 @@ import paypal from '@images/cards/paypal-error.png'
       cols="12"
       md="6"
     >
-    <AnalyticsSeats />
+      <AnalyticsSeats />
     </VCol>
 
     <!-- 👉 Total Revenue -->

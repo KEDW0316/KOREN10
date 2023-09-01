@@ -207,59 +207,59 @@ seats.value = coordinates.map((coord, index) => ({
 
         <VCol cols="12" sm="12" order="2" order-sm="1" class="seating-col">
           <div class="seating-map">
-    <!-- Dynamic Seating Map using SVG -->
-    <svg :width="svgWidth" :height="svgHeight" xmlns="http://www.w3.org/2000/svg">
-        <!-- Generate seats dynamically -->
-        <rect 
-          v-for="seat in seats" 
-          :key="`${seat.x}-${seat.y}`" 
-          :x="seat.x" 
-          :y="seat.y" 
-          width="30" 
-          height="30" 
-          :fill="seat.occupiedStatus === 2 ? '#ccc' : '#FFB6C1'"
-          class="seat-animation" 
-          :style="{ animationDelay: seat.delay }"
-          @click="showPopup(seat)"
-        />
+        <!-- Dynamic Seating Map using SVG -->
+              <svg :width="svgWidth" :height="svgHeight" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Generate seats dynamically -->
+                  <rect 
+                    v-for="seat in seats" 
+                    :key="`${seat.x}-${seat.y}`" 
+                    :x="seat.x" 
+                    :y="seat.y" 
+                    width="30" 
+                    height="30" 
+                    :fill="seat.occupiedStatus === 2 ? '#ccc' : '#FFB6C1'"
+                    class="seat-animation" 
+                    :style="{ animationDelay: seat.delay }"
+                    @click="showPopup(seat)"
+                  />
 
-        <g 
-            v-for="seat in seats" 
-            :key="`${seat.x}-${seat.y}-group`"
-        >
-            <text 
-                v-if="seat.occupiedStatus === 0 || seat.occupiedStatus === 1"
-                :key="`${seat.x}-${seat.y}-text`" 
-                :x="seat.x + 15"  
-                :y="seat.y + 20"  
-                font-size="14"  
-                fill="black"  
-                text-anchor="middle"
-            >
-                {{ seat.stayTime }}m
-            </text>
-        </g>
+                  <g 
+                      v-for="seat in seats" 
+                      :key="`${seat.x}-${seat.y}-group`"
+                  >
+                      <text 
+                          v-if="seat.occupiedStatus === 0 || seat.occupiedStatus === 1"
+                          :key="`${seat.x}-${seat.y}-text`" 
+                          :x="seat.x + 15"  
+                          :y="seat.y + 20"  
+                          font-size="14"  
+                          fill="black"  
+                          text-anchor="middle"
+                      >
+                          {{ seat.stayTime }}m
+                      </text>
+                  </g>
 
 
-    </svg>
-    <VDialog v-model="isPopupVisible" max-width="400px">
-      <VCard>
-        <VCardText v-if="selectedSeat">
-          
-          <VTextarea
-            v-model="selectedSeat.description"
-            label="설명"
-            rows="3"
-            auto-grow
-          ></VTextarea>
-        </VCardText>
-        <VCardActions>
-          <VBtn color="green darken-1" text @click="hidePopup">닫기</VBtn>
-        </VCardActions>
-      </VCard>
-    </VDialog>
+              </svg>
+              <VDialog v-model="isPopupVisible" max-width="400px">
+                <VCard>
+                  <VCardText v-if="selectedSeat">
+                    
+                    <VTextarea
+                      v-model="selectedSeat.description"
+                      label="설명"
+                      rows="3"
+                      auto-grow
+                    ></VTextarea>
+                  </VCardText>
+                  <VCardActions>
+                    <VBtn color="green darken-1" text @click="hidePopup">닫기</VBtn>
+                  </VCardActions>
+                </VCard>
+              </VDialog>
 
-    </div>
+          </div>
 
 
         </VCol>

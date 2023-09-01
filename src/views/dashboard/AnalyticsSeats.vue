@@ -151,47 +151,47 @@ console.log(seats)
 <template>
   <VCard class="text-center text-sm-start">
     <VRow no-gutters>
-        <!-- 제목 열 추가 -->
-        <VCol cols="12">
-            <div class="seating-title">
-                MICA 좌석 현황
-            </div>
-        </VCol>
-
-        <VCol cols="12" sm="6" order="2" order-sm="1" class="seating-col">
-          <div class="seating-map">
-            <!-- Dynamic Seating Map using SVG -->
-            <svg :width="svgWidth" :height="svgHeight" xmlns="http://www.w3.org/2000/svg">
-              <!-- Generate seats dynamically -->
-              <g v-for="(seat, index) in seats" :key="`${seat.x}-${seat.y}-group`">
-                <rect 
-                  :x="seat.x" 
-                  :y="seat.y" 
-                  width="30" 
-                  height="30" 
-                  fill="#ccc"
-                  class="seat-animation" 
-                  :style="{ animationDelay: seat.delay }"
-                />
-                <text 
-                  :x="seat.x + 15"  
-                  :y="seat.y + 20"  
-                  font-size="14"  
-                  fill="black"  
-                  text-anchor="middle"
-                >
-                  {{ index + 1 }}
-                </text>
-              </g>
-            </svg>
+      <!-- 제목 열 추가 -->
+      <VCol cols="12">
+          <div class="seating-title">
+              좌석 통계 정보
           </div>
-        </VCol>
-        <VCol cols="12" sm="6" order="2" order-sm="1" class="seating-col">
-    <VRow>
-      좌석별 빅데이터 분석 결과가 여기 표시됩니다.
-      좌석을 클릭하면 해당 데이터를 볼 수 있게 개발 할 예정입니다!
-    </VRow>
-  </VCol>
+      </VCol>
+
+      <VCol cols="12" sm="8" order="2" order-sm="1" class="seating-col">
+        <div class="seating-map">
+          <!-- Dynamic Seating Map using SVG -->
+          <svg :width="svgWidth" :height="svgHeight" xmlns="http://www.w3.org/2000/svg">
+            <!-- Generate seats dynamically -->
+            <g v-for="(seat, index) in seats" :key="`${seat.x}-${seat.y}-group`">
+              <rect 
+                :x="seat.x" 
+                :y="seat.y" 
+                width="30" 
+                height="30" 
+                fill="#ccc"
+                class="seat-animation" 
+                :style="{ animationDelay: seat.delay }"
+              />
+              <text 
+                :x="seat.x + 15"  
+                :y="seat.y + 20"  
+                font-size="14"  
+                fill="black"  
+                text-anchor="middle"
+              >
+                {{ index + 1 }}
+              </text>
+            </g>
+          </svg>
+        </div>
+      </VCol>
+      <VCol cols="12" sm="4" order="2" order-sm="1" class="seating-col">
+        <VRow>
+          좌석별 빅데이터 분석 결과가 여기 표시됩니다.
+          좌석을 클릭하면 해당 데이터를 볼 수 있게 개발 할 예정입니다!
+        </VRow>
+      </VCol>
 
     </VRow>
 </VCard>
