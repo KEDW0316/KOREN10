@@ -57,65 +57,19 @@ const coordinates = [
   { x: 50, y: 50 }
 ];
 
-const is_occupied = [
-  [2, 2, 2, 2, 2, 1],
-  [2, 2, 2, 2, 2, 1],
-  [2, 2, 0, 2, 2, 1],
-  [2, 2, 2, 2, 2, 1],
-  [2, 2, 2, 2, 2, 1],
-  [2, 1, 0, 2, 2, 1],
-  [2, 1, 0, 2, 2, 1],
-  [2, 1, 0, 2, 2, 1],
-  [2, 1, 0, 2, 2, 1],
-  [2, 1, 0, 0, 2, 1],
-  [2, 1, 0, 0, 2, 1],
-  [2, 1, 0, 0, 1, 1]
-];
-let currentIndex = ref(0); // 현재 is_occupied 배열의 인덱스
-
-const updateOccupancyStatus = () => {
-  
-  if (currentIndex.value < is_occupied.length - 1) {
-    currentIndex.value++;
-  } else {
-    currentIndex.value = 0; // 배열의 마지막 상태에 도달하면 처음으로 돌아갑니다.
-  }
-
-  seats.value.forEach((seat, index) => {
-    seat.occupiedStatus = is_occupied[currentIndex.value][index];
-  });
-  
-};
-
-setInterval(updateOccupancyStatus, 1500);
 
 // 최대 x, y 값을 찾습니다.
 const maxX = Math.max(...coordinates.map(coord => coord.x));
 const maxY = Math.max(...coordinates.map(coord => coord.y));
 
 // 화면의 최대 너비와 높이를 정의합니다.
-const maxScreenWidth = 250;  // SVG의 너비
-const maxScreenHeight = 200; // SVG의 높이
+const maxScreenWidth = 150;  // SVG의 너비
+const maxScreenHeight = 100; // SVG의 높이
 
 // 스케일링 비율을 계산합니다.
 const scaleX = maxScreenWidth / maxX;
 const scaleY = maxScreenHeight / maxY;
 
-// 팝업 상태와 선택된 좌석 정보를 저장하는 ref 추가
-const isPopupVisible = ref(false);
-const selectedSeat = ref(null);
-
-// 팝업을 표시하는 함수
-const showPopup = (seat) => {
-  selectedSeat.value = seat;
-  isPopupVisible.value = true;
-};
-
-// 팝업을 숨기는 함수
-const hidePopup = () => {
-  isPopupVisible.value = false;
-  selectedSeat.value = null;
-};
 
 
 // 초기 상태 설정
@@ -123,14 +77,11 @@ seats.value = coordinates.map((coord, index) => ({
   x: coord.x * scaleX,
   y: coord.y * scaleY,
   delay: randomDelay(1) + 's',
-  occupiedStatus: is_occupied[currentIndex.value][index],
   stayTime: randomStayTime(),
   description: ''  // 초기 설명은 빈 문자열로 설정
 }));
 
-
-
-
+console.log(seats)
 </script>
 
 <style scoped>
@@ -167,12 +118,6 @@ seats.value = coordinates.map((coord, index) => ({
   pointer-events: all; /* pointer-events 설정 */
 }
 
-.seat-animation:hover {
-    transform: scale(1.1);
-}
-
-
-
 .seating-title {
     font-size: 1.5rem;
     font-weight: bold;
@@ -181,18 +126,26 @@ seats.value = coordinates.map((coord, index) => ({
     background-color: #f5f5f5;
     border-bottom: 1px solid #e0e0e0;
 }
-.seat-popup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 20px;
-  background-color: white;
-  border: 1px solid #ccc;
-  z-index: 1000;
+
+.text-wrapper {
+  display: flex; /* Flexbox를 사용하여 자식 요소들을 가로로 배열 */
+  justify-content: space-between; /* 자식 요소들 사이에 동일한 간격을 부여 */
 }
 
-
+.text-container {
+  padding: 20px;
+  border: 2px solid #E0E0E0;
+  background-color: #EDE7F6;
+  border-radius: 10px;
+  font-size: 16px;
+  color: #616161;
+  text-align: center;
+  margin-bottom: 10px; /* 각 텍스트 박스 사이에 마진 추가 */
+  height: 80px; /* 텍스트 박스의 높이를 조절 */
+  display: flex;
+  align-items: center; /* 텍스트를 박스 중앙에 위치시키기 위해 */
+  justify-content: center;
+}
 </style>
 
 <template>
@@ -205,64 +158,40 @@ seats.value = coordinates.map((coord, index) => ({
             </div>
         </VCol>
 
-        <VCol cols="12" sm="12" order="2" order-sm="1" class="seating-col">
+        <VCol cols="12" sm="6" order="2" order-sm="1" class="seating-col">
           <div class="seating-map">
-    <!-- Dynamic Seating Map using SVG -->
-    <svg :width="svgWidth" :height="svgHeight" xmlns="http://www.w3.org/2000/svg">
-        <!-- Generate seats dynamically -->
-        <rect 
-          v-for="seat in seats" 
-          :key="`${seat.x}-${seat.y}`" 
-          :x="seat.x" 
-          :y="seat.y" 
-          width="30" 
-          height="30" 
-          :fill="seat.occupiedStatus === 2 ? '#ccc' : '#FFB6C1'"
-          class="seat-animation" 
-          :style="{ animationDelay: seat.delay }"
-          @click="showPopup(seat)"
-        />
-
-        <g 
-            v-for="seat in seats" 
-            :key="`${seat.x}-${seat.y}-group`"
-        >
-            <text 
-                v-if="seat.occupiedStatus === 0 || seat.occupiedStatus === 1"
-                :key="`${seat.x}-${seat.y}-text`" 
-                :x="seat.x + 15"  
-                :y="seat.y + 20"  
-                font-size="14"  
-                fill="black"  
-                text-anchor="middle"
-            >
-                {{ seat.stayTime }}m
-            </text>
-        </g>
-
-
-    </svg>
-    <VDialog v-model="isPopupVisible" max-width="400px">
-      <VCard>
-        <VCardText v-if="selectedSeat">
-          
-          <VTextarea
-            v-model="selectedSeat.description"
-            label="설명"
-            rows="3"
-            auto-grow
-          ></VTextarea>
-        </VCardText>
-        <VCardActions>
-          <VBtn color="green darken-1" text @click="hidePopup">닫기</VBtn>
-        </VCardActions>
-      </VCard>
-    </VDialog>
-
-    </div>
-
-
+            <!-- Dynamic Seating Map using SVG -->
+            <svg :width="svgWidth" :height="svgHeight" xmlns="http://www.w3.org/2000/svg">
+              <!-- Generate seats dynamically -->
+              <g v-for="(seat, index) in seats" :key="`${seat.x}-${seat.y}-group`">
+                <rect 
+                  :x="seat.x" 
+                  :y="seat.y" 
+                  width="30" 
+                  height="30" 
+                  fill="#ccc"
+                  class="seat-animation" 
+                  :style="{ animationDelay: seat.delay }"
+                />
+                <text 
+                  :x="seat.x + 15"  
+                  :y="seat.y + 20"  
+                  font-size="14"  
+                  fill="black"  
+                  text-anchor="middle"
+                >
+                  {{ index + 1 }}
+                </text>
+              </g>
+            </svg>
+          </div>
         </VCol>
+        <VCol cols="12" sm="6" order="2" order-sm="1" class="seating-col">
+    <VRow>
+      좌석별 빅데이터 분석 결과가 여기 표시됩니다.
+      좌석을 클릭하면 해당 데이터를 볼 수 있게 개발 할 예정입니다!
+    </VRow>
+  </VCol>
 
     </VRow>
 </VCard>

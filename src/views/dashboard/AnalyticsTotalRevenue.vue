@@ -1,10 +1,10 @@
 <script setup>
-import VueApexCharts from 'vue3-apexcharts'
+import { hexToRgb } from '@layouts/utils';
+import VueApexCharts from 'vue3-apexcharts';
 import {
-  useDisplay,
-  useTheme,
-} from 'vuetify'
-import { hexToRgb } from '@layouts/utils'
+useDisplay,
+useTheme,
+} from 'vuetify';
 
 const vuetifyTheme = useTheme()
 const display = useDisplay()
@@ -240,7 +240,7 @@ const balanceData = [
         :class="$vuetify.display.smAndUp ? 'border-e' : 'border-b'"
       >
         <VCardItem class="pb-0">
-          <VCardTitle>Total Revenue</VCardTitle>
+          <VCardTitle>총 매출</VCardTitle>
 
           <template #append>
             <div class="me-n3">
@@ -295,7 +295,7 @@ const balanceData = [
           />
 
           <p class="font-weight-medium text-high-emphasis mb-7">
-            62% Company Growth
+            매출이 78% 상승했습니다!
           </p>
           <div class="d-flex align-center justify-center gap-x-8 gap-y-4 flex-wrap">
             <div
