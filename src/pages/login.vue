@@ -1,16 +1,62 @@
 <script setup>
-import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
-import logo from '@images/logo.svg?raw'
+import axios from 'axios';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const form = ref({
   email: '',
   password: '',
   remember: false,
-})
+});
 
-const isPasswordVisible = ref(false)
+const isPasswordVisible = ref(false);
+const router = useRouter();
+
+// const handleLogin = async () => {
+//   // TODO: 실제 로그인 로직을 여기에 구현합니다.
+//   // 예를 들면, API 호출을 통해 서버에서 로그인을 처리할 수 있습니다.
+
+//   // 로그인이 성공적으로 처리된 경우 대시보드로 리디렉션합니다.
+//   const { email, password } = form.value;
+//   if (email == 'test' && password == 'test') {
+//     const cafeId = 1;
+//     router.push({ name: 'Dashboard', query: { cafeId : cafeId } });
+//   }
+
+//   if (email == 'test2' && password == 'test2') {
+//     const cafeId = 2;
+//     router.push({ name: 'Dashboard', query: { cafeId : cafeId } });
+//   }
+  
+// };
+
+const handleLogin = async () => {
+  const { email, password } = form.value;
+
+  try {
+    // email 값을 사용하여 API에서 사용자 정보를 가져옵니다.
+    const response = await axios.get(`http://61.252.59.31:5000/user_web/${email}`);
+    console.log(response)
+    // API 응답에서 사용자 비밀번호와 관리하는 카페 ID를 가져옵니다.
+    const { user_pw, manage_cafe_id } = response.data;
+
+    // 입력된 비밀번호와 API 응답의 비밀번호를 비교합니다.
+    if (password === user_pw) {
+      // 비밀번호가 일치하면 대시보드로 리디렉션하고, 카페 ID를 쿼리로 전달합니다.
+      router.push({ name: 'Dashboard', query: { cafeId: manage_cafe_id } });
+    } else {
+      // 비밀번호가 일치하지 않으면 오류 메시지를 표시합니다.
+      console.error("Incorrect password");
+      // 여기에 사용자에게 비밀번호가 틀렸다는 메시지를 표시하는 코드를 추가할 수 있습니다.
+    }
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // 여기에 API 호출에 실패했을 때의 처리 로직을 추가할 수 있습니다.
+  }
+};
+
 </script>
-
+  
 <template>
   <div class="auth-wrapper d-flex align-center justify-center pa-4">
     <VCard
@@ -18,39 +64,24 @@ const isPasswordVisible = ref(false)
       max-width="448"
     >
       <VCardItem class="justify-center">
-        <template #prepend>
-          <div class="d-flex">
-            <div
-              class="d-flex text-primary"
-              v-html="logo"
-            />
-          </div>
-        </template>
-
         <VCardTitle class="text-2xl font-weight-bold">
-          sneat
+          MICA
         </VCardTitle>
       </VCardItem>
 
       <VCardText class="pt-2">
-        <h5 class="text-h5 mb-1">
-          Welcome to sneat! 👋🏻
-        </h5>
-        <p class="mb-0">
-          Please sign-in to your account and start the adventure
-        </p>
       </VCardText>
 
       <VCardText>
-        <VForm @submit.prevent="$router.push('/')">
+        <VForm @submit.prevent="handleLogin">
           <VRow>
             <!-- email -->
             <VCol cols="12">
               <VTextField
                 v-model="form.email"
                 autofocus
-                placeholder="johndoe@email.com"
-                label="Email"
+                placeholder="johndoe"
+                label="ID"
                 type="email"
               />
             </VCol>
@@ -104,22 +135,7 @@ const isPasswordVisible = ref(false)
               </RouterLink>
             </VCol>
 
-            <VCol
-              cols="12"
-              class="d-flex align-center"
-            >
-              <VDivider />
-              <span class="mx-4">or</span>
-              <VDivider />
-            </VCol>
-
-            <!-- auth providers -->
-            <VCol
-              cols="12"
-              class="text-center"
-            >
-              <AuthProvider />
-            </VCol>
+            
           </VRow>
         </VForm>
       </VCardText>

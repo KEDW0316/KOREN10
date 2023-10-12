@@ -6,7 +6,6 @@
     target="_blank"
     rel="noopener noreferrer"
   >
-    Upgrade to Pro
 
     <VMenu
       open-on-hover

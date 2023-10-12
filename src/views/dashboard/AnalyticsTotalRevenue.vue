@@ -1,14 +1,76 @@
 <script setup>
 import { hexToRgb } from '@layouts/utils';
+import axios from 'axios';
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router'; // useRoute 훅을 import 합니다.
 import VueApexCharts from 'vue3-apexcharts';
 import {
 useDisplay,
 useTheme,
 } from 'vuetify';
+const currentMenu = ref(''); // 현재 선택된 메뉴
+
+const isAmericanoPopupVisible = ref(false); // 아메리카노 팝업 표시 여부
+const showMenuPopup = (menuName) => {
+  currentMenu.value = menuName;
+  isAmericanoPopupVisible.value = true;
+};
+const showAmericanoPopup = () => {
+  isAmericanoPopupVisible.value = true;
+};
+
+const hideAmericanoPopup = () => {
+  isAmericanoPopupVisible.value = false;
+};
+// const menus = ref([
+// { rank: 1, name: 'Americano', icon: '☕' },
+//   { rank: 2, name: 'Latte', icon: '🥛' },
+//   { rank: 3, name: 'Tea', icon: '🍵' },
+//   { rank: 4, name: 'Juice', icon: '🍹' },
+// ]);
+
+const menus = ref([]); // 초기값을 빈 배열로 설정
 
 const vuetifyTheme = useTheme()
 const display = useDisplay()
 
+const route = useRoute(); // 현재 라우트 객체를 가져옵니다.
+const cafeId = route.query.cafeId; // query에서 cafeId 값을 가져옵니다.
+
+const topMenuName = ref(''); // API 응답에서 가져온 menu_name 값을 저장하기 위한 ref
+
+const fetchTopMenu = async () => {
+  try {
+    const response = await axios.get(`http://61.252.59.31:5000/sold/${cafeId}`);
+    if (response.data && response.data.menu_name) {
+      topMenuName.value = response.data.menu_name;
+    }
+  } catch (error) {
+    console.error("Error fetching top menu:", error);
+  }
+};
+
+const fetchMenus = async () => {
+  try {
+    const response = await axios.get(`http://61.252.59.31:5000/sold_menu/${cafeId}`);
+    if (response.data) {
+      const menuData = [
+        { rank: 1, name: response.data.First || 'Unknown', icon: '☕' },
+        { rank: 2, name: response.data.Second || 'Unknown', icon: '🥛' },
+        { rank: 3, name: response.data.Third || 'Unknown', icon: '🍹' },
+        { rank: 4, name: 'Juice', icon: '🍹' },
+      ];
+      menus.value = menuData;
+    }
+  } catch (error) {
+    console.error("Error fetching menus:", error);
+  }
+};
+
+onMounted(() => {
+  fetchTopMenu();
+  fetchMenus(); // 메뉴 데이터를 가져오는 함수를 호출
+});
 const series = [
   {
     name: `${ new Date().getFullYear() - 1 }`,
@@ -145,7 +207,7 @@ const chartOptions = computed(() => {
     },
     radial: {
       chart: { sparkline: { enabled: true } },
-      labels: ['Growth'],
+      labels: ['1위 상품'],
       stroke: { dashArray: 5 },
       colors: [`rgba(${ hexToRgb(String(currentTheme.primary)) }, 1)`],
       states: {
@@ -259,68 +321,45 @@ const balanceData = [
         />
       </VCol>
 
-      <VCol
-        cols="12"
-        sm="5"
-        xl="4"
-      >
-        <VCardText class="text-center">
-          <VBtn
-            size="small"
-            variant="tonal"
-            append-icon="bx-chevron-down"
-            class="mt-4"
-          >
-            2023
-            <VMenu activator="parent">
-              <VList>
-                <VListItem
-                  v-for="(item, index) in ['2023', '2022', '2021']"
-                  :key="index"
-                  :value="item"
-                >
-                  <VListItemTitle>{{ item }}</VListItemTitle>
-                </VListItem>
-              </VList>
-            </VMenu>
-          </VBtn>
+      <VCol cols="12" sm="5" xl="4">
+        <VRow class="menu-grid">
+          <VCol v-for="menu in menus" :key="menu.rank" cols="6" class="menu-col">
+            <VCard class="menu-card" @click="showMenuPopup(menu.name)">
+              <div class="menu-icon text-center">{{ menu.icon }}</div>
+              <VCardTitle class="text-center">{{ menu.name }}</VCardTitle>
+              <VCardSubtitle class="text-center">{{ menu.rank }}위</VCardSubtitle>
+            </VCard>
+          </VCol>
+          <VDialog v-model="isAmericanoPopupVisible" max-width="600px">
+            <VCard>
+              <VCardTitle class="text-h5 py-4 px-5">{{ currentMenu }} 매출 정보</VCardTitle>
+              <VCardText class="px-5">
+                <div class="py-2">
+                  <span class="text-h6">일일 평균 판매량:</span>
+                  <span class="text-h5 ml-2">100잔</span>
+                </div>
+                <div class="py-2">
+                  <span class="text-h6">최고 매출 시간대:</span>
+                  <span class="text-h5 ml-2">10:00 ~ 11:00</span>
+                </div>
+                <div class="py-2">
+                  <span class="text-h6">주 연령층:</span>
+                  <span class="text-h5 ml-2">20대</span>
+                </div>
+              </VCardText>
+              <VCardActions class="justify-end pr-5 pb-4">
+                <VBtn text @click="hideAmericanoPopup">닫기</VBtn>
+              </VCardActions>
+            </VCard>
+          </VDialog>
 
-          <!-- radial chart -->
-          <VueApexCharts
-            type="radialBar"
-            :height="200"
-            :options="chartOptions.radial"
-            :series="[78]"
-            class="mt-6"
-          />
-
-          <p class="font-weight-medium text-high-emphasis mb-7">
-            매출이 78% 상승했습니다!
-          </p>
-          <div class="d-flex align-center justify-center gap-x-8 gap-y-4 flex-wrap">
-            <div
-              v-for="data in balanceData"
-              :key="data.year"
-              class="d-flex align-center gap-3"
-            >
-              <VAvatar
-                :icon="data.icon"
-                :color="data.color"
-                size="38"
-                rounded
-                variant="tonal"
-              />
-
-              <div class="text-start">
-                <span class="text-sm"> {{ data.year }}</span>
-                <h6 class="text-base font-weight-medium">
-                  {{ data.amount }}
-                </h6>
-              </div>
-            </div>
-          </div>
-        </VCardText>
+        </VRow>
+        <div class="text-center mt-4" v-if="menus.length">
+          카페의 매출 1위 메뉴는 <strong>{{ menus[0].name }}</strong> 입니다.
+        </div>
       </VCol>
+
+
     </VRow>
   </VCard>
 </template>
@@ -330,3 +369,39 @@ const balanceData = [
   transform: translateY(-10px);
 }
 </style>
+
+<style scoped>
+.menu-grid {
+  padding: 16px;
+}
+
+.menu-col {
+  padding: 8px; 
+} 
+.menu-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.menu-card {
+  height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+  cursor: pointer; 
+
+}
+</style>
+
+
+
+
+
